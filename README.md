@@ -10,4 +10,6 @@ Enter a phrase in the search bar, and the program will list examples of that phr
 
 The accuracy measure is based on the number of upvotes, with the theory being that social media users do not upvote posts with grammatical or spelling errors.
 
+<a data-flickr-embed="true" data-context="true" href="https://www.flickr.com/photos/188824566@N02/49989997321/in/dateposted-public/" title="example"><img src="https://live.staticflickr.com/65535/49989997321_b7dcb4be4b_z.jpg" width="640" height="592" alt="example"></a>
+
 
