@@ -63,8 +63,11 @@ class twitter_api_and_cleaner(api_and_cleaner):
         python_tweets = Twython(creds['twitter'][0]['CONSUMER_KEY'], creds['twitter'][0]['CONSUMER_SECRET'])
         query = {'q': '"' + self.exactTerm + '"',
                  'count': howManyToQuery,
-                 'lang': 'en'
+                 'lang': 'en',
+                 'result_type': 'popular'
                  }
+        # docs https://developer.twitter.com/en/docs/tweets/search/api-reference/get-search-tweets
+        # searching by  date may also be helpful
         return python_tweets.search(**query)
 
     def process_json(self,jsonStuff,dispcutoff):
@@ -95,7 +98,7 @@ class reddit_api_and_cleaner(api_and_cleaner):
                              username=creds['reddit'][0]['USERNAME'], \
                              password=creds['reddit'][0]['PASSWORD'])
         all = reddit.subreddit('all')
-        return all.search(self.exactTerm, limit=howManyToQuery)
+        return all.search(self.exactTerm, limit=howManyToQuery,sort='hot')
 
     def process_json(self, jsonStuff, dispcutoff):
         upvoteTotal = 0
