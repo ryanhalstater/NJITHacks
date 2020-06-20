@@ -37,7 +37,7 @@ class api_and_cleaner:
     #     toRet = re.split('[,@#:\'\:; ?!~_   ]', sentence)
     #     return list(filter(None, toRet))
 
-    def process_json(self,howManyToQuery):
+    def process_json(self,howManyToQuery,metricCutoff):
         return [],5,10
 
     def decide_confidence(self,n, avg, cutoff, ncutoff):
@@ -49,7 +49,7 @@ class api_and_cleaner:
     def search(self,howManyToQuery,cutoff,ncutoff,dispcutoff):
         jsonStuff = self.get_json(howManyToQuery)
 
-        toRet, metricTotal, n = self.process_json(jsonStuff,dispcutoff)
+        toRet, metricTotal, n = self.process_json(jsonStuff,dispcutoff,cutoff) #using cutoff as value to print tweets over it
 
         if not n == 0:
             print('metric avg: ', metricTotal / n)
@@ -63,24 +63,24 @@ class twitter_api_and_cleaner(api_and_cleaner):
         python_tweets = Twython(creds['twitter'][0]['CONSUMER_KEY'], creds['twitter'][0]['CONSUMER_SECRET'])
         query = {'q': '"' + self.exactTerm + '"',
                  'count': howManyToQuery,
-                 'lang': 'en',
-                 'result_type': 'popular'
+                 'lang': 'en'
                  }
         # docs https://developer.twitter.com/en/docs/tweets/search/api-reference/get-search-tweets
         # searching by  date may also be helpful
         return python_tweets.search(**query)
 
-    def process_json(self,jsonStuff,dispcutoff):
+    def process_json(self,jsonStuff,dispcutoff,metricCutoff):
         sentences = {}
         retweetTotal = 0
-        test = []
+        n = 0
         for tweet in jsonStuff['statuses']:
             for sent in self.cleanText(tweet['text']):
-                if (self.exactTerm.lower() in sent.lower()):
+                if (self.exactTerm.lower() in sent.lower()): # and (tweet['retweet_count'] >= metricCutoff):
                     if not sent.strip().lower() == self.exactTerm.lower():
-                        test.append(sent.strip())
+                        n += 1
                         retweetTotal += tweet['retweet_count']  # go back to fix l8r
-                        sentences[sent.strip()] = tweet['retweet_count']
+                        if (tweet['retweet_count'] >= metricCutoff):
+                            sentences[sent.strip()] = tweet['retweet_count']
         # now lets turn lists into strings
         sentences = {k: v for k, v in sorted(sentences.items(), key=lambda item: item[1], reverse=True)}
         toRet = [key for key in list(sentences.keys())[0:dispcutoff]] #confirmed to work
@@ -98,27 +98,30 @@ class reddit_api_and_cleaner(api_and_cleaner):
                              username=creds['reddit'][0]['USERNAME'], \
                              password=creds['reddit'][0]['PASSWORD'])
         all = reddit.subreddit('all')
-        return all.search(self.exactTerm, limit=howManyToQuery,sort='hot')
+        return all.search(self.exactTerm, limit=howManyToQuery,sort='top') #,sort='top' was hot during test
 
-    def process_json(self, jsonStuff, dispcutoff):
+    def process_json(self, jsonStuff, dispcutoff,metricCutoff):
         upvoteTotal = 0
         sentences = {}
+        n=0
         for i in jsonStuff:
             for sent in self.cleanText(i.title):
                 if (self.exactTerm.lower() in sent.lower()):
+                    n += 1
                     upvoteTotal += i.score
-                    sentences[sent] = i.score
+                    if i.score >= metricCutoff:
+                        sentences[sent] = i.score
         sentences = {k: v for k, v in sorted(sentences.items(), key=lambda item: item[1], reverse=True)}
         toRet = [key for key in list(sentences.keys())[0:dispcutoff]]  # confirmed to work
 
-        return (toRet, upvoteTotal, len(sentences))
+        return (toRet, upvoteTotal, n)
 
 class wikipedia_api_and_cleaner(api_and_cleaner):
     def get_json(self,howManyToQuery):
         resp = requests.get('http://en.wikipedia.org/w/api.php?action=query&format=json&list=search&srsearch='+self.exactTerm+'&srlimit='+str(howManyToQuery))
         return resp.json()
 
-    def process_json(self, jsonStuff, dispcutoff):
+    def process_json(self, jsonStuff, dispcutoff,metricCutoff):
         is_contained = 0
         valid_examples = []
         for result in jsonStuff['query']['search']:
