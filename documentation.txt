@@ -1,0 +1,20 @@
+V1.0
+
+- Example sentences are taken from Twitter and Reddit. 
+
+- Number of retweets and upvotes are being used as reliability metrics (the more there are, the more reliable the search phrase), which is obviously oversimplified, but it's what is being used for now. We query for the first search results and display the average retweet/upvote values, along with the reliability metric this is based off of.
+
+- Filtering out misc. symbols, e.g., retweets, links, and emojis was a significant task.
+
+- Some search phrases yield some funny (i.e. humorous and/or funky) results, but they do provide examples of real-life usage and so we'll keep them in there.
+
+V1.1
+
+- Added a search to get sentences from a corpus, but runtime is very slow. 
+
+- Made a crude Python-based GUI to input search term and display results.
+
+
+V1.2
+
+- Replaced the corpus search with a search of Wikipedia. The metric for this will simply be the number of hits, since there's nothing like retweets/upvotes for Wikipedia.
