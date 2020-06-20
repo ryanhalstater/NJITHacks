@@ -36,7 +36,7 @@ class MyGUI:
         corpusbox = Text(master)
         corpusbox.grid(row=5, column=0, pady=2)
         corpusbox.configure(height=1)
-        corpusbox.insert(END, 'Sentences from books and news: ')
+        corpusbox.insert(END, 'Sentences from Wikipedia: ')
 
         t3 = Text(master)
         t3.grid(row=6, column=0, pady=2)
@@ -59,10 +59,14 @@ class MyGUI:
         for entity in [t1,t2,t3, twitterbox, redditbox, corpusbox]:
             entity.config(state=NORMAL)
             entity.delete('1.0', END)
-        
-        twitterResults, twitterConf, avgRT = scraper.searchTwitter(phrase, 50, 10, 5, 10)
-        redditResults, redditConf, avgUV = scraper.searchReddit(phrase, 50,60,5,10)
 
+        twitt_api = scraper.twitter_api_and_cleaner(phrase)
+        reddit_api = scraper.reddit_api_and_cleaner(phrase)
+        wiki_api = scraper.wikipedia_api_and_cleaner(phrase)
+
+        twitterResults, twitterConf, avgRT = twitt_api.search(50, 10, 5, 10)
+        redditResults, redditConf, avgUV = reddit_api.search(50,60,5,10)
+        wikiResults, wikiConf, meaninglessMetric = wiki_api.search(10,2,1,10) #gonnna need to optimize, ncutoff should always be 1
         for sentence in twitterResults:
             t1.insert(END, sentence.strip())
             t1.insert(END, "\n")
@@ -83,15 +87,16 @@ class MyGUI:
         t2.configure(height=height)
         master.update_idletasks()
         
-        corpusResults, corpusConf = scraper.searchCorpus(phrase,10)
-        for sentence in corpusResults:
+
+        for sentence in wikiResults:
             t3.insert(END, sentence)
             t3.insert(END,"\n")
             #a procedure to reconfigure the height of Text widget
         height = t3.tk.call((t3._w, "count", "-update", "-displaylines", "1.0", "end"))
         t3.configure(height=height)
         master.update_idletasks()
-        corpusbox.insert(END, 'Sentences from books and news: ')
+        wikiStr = "Sentences from Wikipedia:     (" + wikiConf + "- " + f"{meaninglessMetric:.0f}" + " exact matches.)"
+        corpusbox.insert(END, wikiStr)
             
 root = Tk()
 my_gui = MyGUI(root)

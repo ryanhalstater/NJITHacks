@@ -5,153 +5,146 @@ from twython import Twython
 import pandas as pd
 import re
 import praw
-import nltk
+import nltk #do we still need this? Probs a fair amount of these not needed
 import unicodedata
-'''
+from bs4 import BeautifulSoup
+
 def main():
-    #this stuff is all for twitter
-    sentenceList1, credibility1 = searchTwitter("how are you", 50, 10, 5, 10)
-    print("twitter:")
-    print(sentenceList1)
-    print(credibility1)
-    sentenceList, credibility = searchReddit("how are you",50,100,5,10)
-    print("reddit:")
-    print(sentenceList)
-    print(credibility)
-    sentenceList2, credibility2 = searchCorpus("how are you", 10)
-    print("corpus:")
-    print(sentenceList2)
-    print(credibility2)
-'''
-    #for twitter, cutoff around 10 seems reasonable
-
-def cleanText(text):
-    text.replace("’","'")
-    text = ''.join(c for c in unicodedata.normalize('NFC', text) if c <= '\uFFFF')
-    toRet = ''.join(c for c in text if c <= '\uFFFF')
-    toRet = re.sub('(RT )?@(\w)*:?\s','',toRet)
-    toRet = re.sub('(\w)*:\w','',toRet)
-    toRet = toRet.strip()
-    toRet = re.split('[(\.|\?|!)\n]',toRet)
-    return list(filter(None, toRet))
-
-def removeWhitespaceAndChars(sentence):
-    toRet = re.split('[,@#:\'\:; ?!~_   ]',sentence)
-    return list(filter(None, toRet))
-
-def searchTwitter(exactTerm,howManyToQuery,cutoff,ncutoff,dispcutoff):
-
-    creds = json.load(open("credentials.json", "r"))
-
-    python_tweets = Twython(creds['twitter'][0]['CONSUMER_KEY'], creds['twitter'][0]['CONSUMER_SECRET'])
-    query = {'q': '"'+exactTerm+'"',
-             'count': howManyToQuery,
-             'lang': 'en'
-             }
-    jsonStuff = python_tweets.search(**query)
-
-    sentences = {}
-    retweetTotal = 0
-    n = 0
-    for tweet in jsonStuff['statuses']:
-        for sent in cleanText(tweet['text']):
-            # print(sent)
-            if (exactTerm.lower() in sent.lower()):
-                if not sent.strip().lower() == exactTerm.lower():
-                    n +=  1
-                    # print(tweet['retweet_count'])
-                    retweetTotal += tweet['retweet_count'] #go back to fix l8r
-                    sentences[sent.strip()] = tweet['retweet_count']
+    # testtw = twitter_api_and_cleaner('chicken fried')
+    # print(testtw.search(50, 10, 5, 10))
     #
-    #now lets turn lists into strings
-    sentences = {k: v for k, v in sorted(sentences.items(), key=lambda item: item[1],reverse=True)}
-    toRet = {}
-    keysToHit = list(sentences.keys())[0:dispcutoff]
-    # print(len(keysToHit))
-    for key in keysToHit:
-        toRet[key] = sentences[key]
+    # testre = reddit_api_and_cleaner('chicken fried')
+    # print(testre.search(50,60,5,10))
+    #for twitter, cutoff around 10 seems reasonable
+    testwi = wikipedia_api_and_cleaner('chicken fried')
+    print(testwi.search(10,2,1,10)) #we gonna need to optimize these paramaters, ncutoff should always be 1 for wikipedia
+class api_and_cleaner:
+    def __init__(self,exactText):
+        self.exactTerm = exactText
+        pass
 
-    if not n == 0:
-        print('retweets avg: ', retweetTotal / n)
-        return toRet, determineConfidence(n, retweetTotal/n, cutoff, ncutoff), retweetTotal/n
-    return {}, 'No results: extremely unreliable', 'N/A'
+    def cleanText(self,text):
+        text.replace("’", "'")
+        text = ''.join(c for c in unicodedata.normalize('NFC', text) if c <= '\uFFFF')
+        toRet = ''.join(c for c in text if c <= '\uFFFF')
+        toRet = re.sub('(RT )?@(\w)*:?\s', '', toRet)
+        toRet = re.sub('(\w)*:\w', '', toRet)
+        toRet = toRet.strip()
+        toRet = re.split('[(\.|\?|!)\n]', toRet)
+        return list(filter(None, toRet))
+    # def remove_whitespace_and_craziness(self,sentence): #unused function
+    #     toRet = re.split('[,@#:\'\:; ?!~_   ]', sentence)
+    #     return list(filter(None, toRet))
+
+    def process_json(self,howManyToQuery):
+        return [],5,10
+
+    def decide_confidence(self,n, avg, cutoff, ncutoff):
+        if (avg < cutoff or n < ncutoff):
+            return 'likely unreliable'
+        else:
+            return 'likely reliable'
+
+    def search(self,howManyToQuery,cutoff,ncutoff,dispcutoff):
+        jsonStuff = self.get_json(howManyToQuery)
+
+        toRet, metricTotal, n = self.process_json(jsonStuff,dispcutoff)
+
+        if not n == 0:
+            print('metric avg: ', metricTotal / n)
+            return toRet, self.decide_confidence(n, metricTotal / n, cutoff, ncutoff), metricTotal / n
+        return {}, 'No results: unreliable', 0
+
+class twitter_api_and_cleaner(api_and_cleaner):
+    def get_json(self,howManyToQuery):
+        creds = json.load(open("credentials.json", "r"))
+
+        python_tweets = Twython(creds['twitter'][0]['CONSUMER_KEY'], creds['twitter'][0]['CONSUMER_SECRET'])
+        query = {'q': '"' + self.exactTerm + '"',
+                 'count': howManyToQuery,
+                 'lang': 'en'
+                 }
+        return python_tweets.search(**query)
+
+    def process_json(self,jsonStuff,dispcutoff):
+        sentences = {}
+        retweetTotal = 0
+        test = []
+        for tweet in jsonStuff['statuses']:
+            for sent in self.cleanText(tweet['text']):
+                if (self.exactTerm.lower() in sent.lower()):
+                    if not sent.strip().lower() == self.exactTerm.lower():
+                        test.append(sent.strip())
+                        retweetTotal += tweet['retweet_count']  # go back to fix l8r
+                        sentences[sent.strip()] = tweet['retweet_count']
+        # now lets turn lists into strings
+        sentences = {k: v for k, v in sorted(sentences.items(), key=lambda item: item[1], reverse=True)}
+        toRet = [key for key in list(sentences.keys())[0:dispcutoff]] #confirmed to work
+
+        return (toRet, retweetTotal, len(sentences))
 
 
-def searchReddit(exactTerm,howManyToQuery,cutoff,ncutoff,dispcutoff):
-    sentences = {}
-    creds = json.load(open("credentials.json", "r"))
-    reddit = praw.Reddit(client_id=creds['reddit'][0]['CLIENT_ID'], \
-                         client_secret=creds['reddit'][0]['CLIENT_SECRET'], \
-                         user_agent='texter', \
-                         username = creds['reddit'][0]['USERNAME'], \
-                         password = creds['reddit'][0]['PASSWORD'] )
-    all = reddit.subreddit('all')
-    results = all.search(exactTerm, limit=howManyToQuery)
-    upvoteTotal = 0
-    n = 0
-    for i in results:
-        
-        for sent in cleanText(i.title):
-            if (exactTerm.lower() in sent.lower()):
-                n  += 1
-                upvoteTotal += i.score
-                sentences[sent] = i.score
-    print(sentences)
-    sentences = {k: v for k, v in sorted(sentences.items(), key=lambda item: item[1], reverse=True)}
-    toRet = {}
-    keysToHit = list(sentences.keys())[0:dispcutoff]
-    # print(len(keysToHit))
-    for key in keysToHit:
-        toRet[key] = sentences[key]
-    if n > 0:
-        upvoteAvg = upvoteTotal/ n
-        print('upvote avg: ',str(upvoteAvg))
-        return toRet, determineConfidence(n,upvoteAvg,cutoff,ncutoff), upvoteTotal/n
-    return {}, 'No results: extremely unreliable', 'N/A'
+class reddit_api_and_cleaner(api_and_cleaner):
+    def get_json(self,howManyToQuery):
+        sentences = {}
+        creds = json.load(open("credentials.json", "r"))
+        reddit = praw.Reddit(client_id=creds['reddit'][0]['CLIENT_ID'], \
+                             client_secret=creds['reddit'][0]['CLIENT_SECRET'], \
+                             user_agent='texter', \
+                             username=creds['reddit'][0]['USERNAME'], \
+                             password=creds['reddit'][0]['PASSWORD'])
+        all = reddit.subreddit('all')
+        return all.search(self.exactTerm, limit=howManyToQuery)
 
-def determineConfidence(n,avg,cutoff,ncutoff):
-    if (avg < cutoff or n < ncutoff):
-        return 'likely unreliable'
-    else:
-        return 'likely reliable'
+    def process_json(self, jsonStuff, dispcutoff):
+        upvoteTotal = 0
+        sentences = {}
+        for i in jsonStuff:
+            for sent in self.cleanText(i.title):
+                if (self.exactTerm.lower() in sent.lower()):
+                    upvoteTotal += i.score
+                    sentences[sent] = i.score
+        sentences = {k: v for k, v in sorted(sentences.items(), key=lambda item: item[1], reverse=True)}
+        toRet = [key for key in list(sentences.keys())[0:dispcutoff]]  # confirmed to work
 
-def searchCorpus(exactTerm,cutoff):
-    searchingFor = exactTerm.split()
-    namesGuten = nltk.corpus.gutenberg.fileids()
-    # print(len(nltk.corpus.gutenberg.sents(namesGuten)))
-    # print(len(nltk.corpus.gutenberg.sents(namesGuten[0])))
-    browncats = nltk.corpus.brown.categories()
-    # print(nltk.corpus.brown.sents(categories = browncats))
-    reutcats = nltk.corpus.reuters.categories()
-    # print(nltk.corpus.reuters.sents(categories = reutcats))
+        return (toRet, upvoteTotal, len(sentences))
 
-    sentences = []
-    n = 0
+class wikipedia_api_and_cleaner(api_and_cleaner):
+    def get_json(self,howManyToQuery):
+        resp = requests.get('http://en.wikipedia.org/w/api.php?action=query&format=json&list=search&srsearch='+self.exactTerm+'&srlimit='+str(howManyToQuery))
+        return resp.json()
 
-    #NOTE: may want to drop reuters for speed
-    #nltk.corpus.reuters.sents(categories = reutcats),
-    
-    for corpusActive in [nltk.corpus.gutenberg.sents(namesGuten), \
-                         nltk.corpus.brown.sents(categories = browncats)]:
-        for sent in corpusActive:
-            if set([x.lower() for x in searchingFor]).issubset([x.lower().translate({ord(':'): None, ord(';'): None, ord('-'): None}) for x in sent]):
-                for i in range(len(sent)-len(searchingFor)):
-                    if [x.lower() for x in sent[i:i+len(searchingFor)]] == [x.lower().translate({ord(':'): None, ord(';'): None, ord('-'): None}) for x in searchingFor]:
-                        sentences.append(sent)
-                        n += 1
-        #print('through an iteration')
-        if n >= cutoff:
-            break
-    # print(n)
+    def process_json(self, jsonStuff, dispcutoff):
+        is_contained = 0
+        valid_examples = []
+        for result in jsonStuff['query']['search']:
+            if len(valid_examples) <= dispcutoff:
+                if (self.exactTerm.lower() in BeautifulSoup(result['snippet'], 'html.parser').text.lower()):
+                    is_contained += 1
+                    valid_examples.append(BeautifulSoup(result['snippet'], 'html.parser').text)
+                elif (self.exactTerm.lower() in result['title'].lower()):
+                    is_contained += 1
+        return (valid_examples, is_contained, 1) #n=1 because is_contained is the deciding metric
 
-    sentList = []
-    for sent in sentences:
-        compilation = ""
-        for word in sent:
-            compilation += word + ' '
-        sentList.append(compilation.strip())
-    print(len(sentList))
-    return sentList, determineConfidence(n, 100, 10, 1)
+
+        print('number of exact matches capitalization insensitive:', is_contained)
+        print('deem to be likely:', is_contained >= instances_until_likely)
+
+main()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # main()
 # print(requests.get('https://api.twitter.com/1.1/search/tweets.json?q=twitterdev%20new%20premium').json())
 
