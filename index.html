@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Robin Scraper</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="device-width">
+        
+        <link href="style.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Patrick+Hand+SC">
+    </head>
+    
+    <body>
+        <header class="header">
+<!--            TODO: make Title a link back to "home"-->
+            <h1>Robin Scraper</h1>
+            <ul class="nav">
+                <li class="nav__item">
+                    <a class="nav__link" href="" target="_blank" rel="noopener noreferrer">About </a>
+                </li>
+                <li class="nav__item">
+                    <a class="nav__link" href="" target="_blank" rel="noopener noreferrer">Documentation </a>
+                </li>
+                <li class="nav__item">
+                    <a class="nav__link" href="" target="_blank" rel="noopener noreferrer">Contact Us</a>
+                </li>
+            </ul>
+        </header>
+                        
+        <div class="description">
+            <p>Enter a phrase into the search box. See how the phrase is used on the Internet, and a prediction of whether the phrase is of native usage or not!</p>
+        </div>
+        
+        <div class="search">
+            <input class="search__box" type="text" placeholder="Enter a phrase...">
+            <button class="search__button" aria-label="search">
+                <p>Go!</p>
+            </button>
+        </div>
+        
+        <section class="results">
+            <div class="confidence-heading">predicted likelihood in native English: </div>
+            <div class="confidences">
+                <p class="confidence-item">Informal Context: 
+                    <input type="text" readonly="readonly" id="informal-context-confidence">
+                </p>
+                <p class="confidence-item">Formal Context: 
+                    <input type="text" readonly="readonly" id="formal-context-confidence">
+                </p>
+            </div>
+            <div class="sentences">
+                <div class="twitter-heading">Twitter</div>
+                <div class="sentences__twitter">
+                    <p>Twitter sentence1</p>
+                    <p>Twitter sentence2</p>
+                    <p>Twitter sentence3</p>
+                    <p>Twitter sentence4</p>
+                    <p>Twitter sentence5</p>
+                    <p>Twitter sentence6</p>
+                    <p>Twitter sentence7</p>
+                    <p>Twitter sentence8</p>
+                    <p>Twitter sentence9</p>
+                    <p>Twitter sentence10</p>
+                </div>
+                <div class="reddit-heading">Reddit</div>
+                <div class="sentences__reddit">
+                    <p>Reddit sentence1</p>
+                    <p>Reddit sentence2</p>
+                    <p>Reddit sentence3</p>
+                    <p>Reddit sentence4</p>
+                    <p>Reddit sentence5</p>
+                    <p>Reddit sentence6</p>
+                    <p>Reddit sentence7</p>
+                    <p>Reddit sentence8</p>
+                    <p>Reddit sentence9</p>
+                    <p>Reddit sentence10</p>
+                </div>
+                <div class="wikipedia-heading">Wikipedia</div>
+                <div class="sentences__wikipedia">
+                    <p>Wikipedia sentence1</p>
+                    <p>Wikipedia sentence2</p>
+                    <p>Wikipedia sentence3</p>
+                    <p>Wikipedia sentence4</p>
+                    <p>Wikipedia sentence5</p>
+                    <p>Wikipedia sentence6</p>
+                    <p>Wikipedia sentence7</p>
+                    <p>Wikipedia sentence8</p>
+                    <p>Wikipedia sentence9</p>
+                    <p>Wikipedia sentence10</p>
+                </div>
+            </div>
+            
+            <div class="averages">
+                <div class="averages__twitter">
+                    <p>Average number of retweets: xx</p>
+                </div>
+                <div class="averages__reddit">
+                    <p>Average number of upvotes: xx</p>
+                </div>
+                <div class="averages__reddit">
+                    <p>Number of hits: xx</p>
+                </div>
+            </div>
+<!--          
+            <div class="reliability">
+                <p class="informal-label">Informal</p>
+                <p class="formal-label">Formal</p>
+                <p class="reliability__informal">Un/likely to be used in native English</p>
+                <p class="reliability__formal">Un/likely to be used in native English</p>
+            </div>
+        </section>
+  -->
+            
+        <footer class="footer">
+            <p>Made by Patrick and Ryan. Updated 06/21/2020</p>
+        </footer>
+        
+    </body>
+</html>

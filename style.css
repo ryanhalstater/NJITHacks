@@ -1,0 +1,236 @@
+/*Redefine box sizing and delete default padding/margins*/
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    padding: 0px;
+    margin: 0px;
+}
+
+/*Styles for <html>*/
+:root {
+/*    Primary/secondary font families*/
+    --ff-primary: 'Patrick Hand SC', serif;
+/*    Font weights*/
+    --ff-reg: 300;
+    --fw-bold: 800;
+/*    Colors*/
+    --color-twitter:rgba(51, 173, 255, 0.35);
+    --color-reddit: rgba(240, 72, 31, 0.35);
+    --color-wikipedia: rgba(235, 235, 235, 0.5);
+/*    Font sizes- rem unit is relative to font size of the root element*/
+    --fs-h1: 2.5rem;
+    --fs-body: 1.5rem;
+    --fs-sentences: 1.25rem;
+    
+/*    Box shadow: */
+    --bs: 0.25em 0.25em .75em rgba(0,0,0,.25), 
+        0.125em 0.125em 0.25em rgba(0,0,0,.15);
+    
+    text-align:center;
+    font-family: var(--ff-primary);
+}
+
+.header {
+    background-color:#EAF4F4;
+    font-size:var(--fs-h1);
+    padding: 0 0 20px;
+}
+
+/* Navigation Links */
+.nav {
+    display:flex;
+    list-style:none;
+    justify-content: center;
+    font-size: var(--fs-body);
+}
+
+.nav__item{
+    margin: 0 1em;
+}
+
+.nav__item:hover{
+    opacity:0.75;
+}
+
+.nav__link{
+    color: black;
+    text-decoration:none;
+}
+
+/* Description */
+
+.description{
+    font-size:1.5rem;
+}
+
+/* Search Section */
+.search {
+    margin: 3em;
+}
+
+.search__box {
+    font-family: var(--ff-primary);
+    font-size:24px;
+    margin:0;
+}
+
+.search__button{
+    font-family: var(--ff-primary);
+    font-size:18px;
+    font-weight:var(--fw-bold);
+    line-height:30px;
+    margin-left: 10px;
+    padding: 0 10px;
+}
+
+/* Prediction Section */
+.confidence-heading {
+    margin-left: 2em;
+    text-align:left;
+}
+
+.confidences {
+    display:flex;
+    justify-content:center;
+    margin: 0 0 20px;
+}
+
+.confidence-item{
+    margin: 0 20px;
+    font-size: var(--fs-body);
+}
+
+/* Sentences Section */
+
+.results{
+    margin: 0 auto;
+    font-size:var(--fs-body);
+}
+
+.sentences {
+    justify-content:center;
+    padding: 10px;
+}
+
+.sentences__twitter {
+    text-align:left;
+    font-size:var(--fs-sentences);
+    border: 3px solid black;
+    margin-bottom: 10px;
+    background-color:var(--color-twitter);
+}
+
+.sentences__reddit{
+    text-align:left;
+    font-size:var(--fs-sentences);
+    border: 3px solid black;
+    margin-bottom: 10px;
+    background-color:var(--color-reddit);
+}
+
+.sentences__wikipedia{
+    text-align:left;
+    font-size:var(--fs-sentences);
+    border: 3px solid black;
+    margin-bottom: 10px;
+    background-color:var(--color-wikipedia);
+}
+
+.twitter-heading{
+    border: 3px solid black;
+    border-bottom: 0px;
+    background: rgba(51, 173, 255, 0.55);
+}
+
+.reddit-heading{
+    border: 3px solid black;
+    border-bottom: 0px;
+    background: rgba(240, 72, 31, 0.55);
+}
+
+.wikipedia-heading{
+    border: 3px solid black;
+    border-bottom: 0px;
+    background: rgba(242, 242, 242, 1.0);
+}
+
+/* Split into 3-column view above a certain width */
+@media (min-width:1400px){
+    .sentences{
+        width:100vw;
+        padding:10px;
+        display:grid;
+        grid-template-areas:"twitter-heading reddit-heading wikipedia-heading"
+                            "twitter-results reddit-results wikipedia-results";
+        grid-column-gap: 10px;
+        grid-template-columns: 32% 32% 32%;
+        margin: 0;
+    }
+    
+    .twitter-heading{grid-area:twitter-heading;}
+    .reddit-heading{grid-area:reddit-heading;}
+    .wikipedia-heading{grid-area:wikipedia-heading;}
+    
+    .sentences__twitter{
+        grid-area:twitter-results; 
+    }
+    .sentences__reddit{
+        grid-area:reddit-results;
+    }
+    .sentences__wikipedia{
+        grid-area:wikipedia-results;
+    }
+    
+    .averages{
+        padding:10px;
+        display:flex;
+        max-width:100%;
+        justify-content: space-evenly;
+        align-items: center;
+        margin: 0;
+    }
+    
+    .averages__twitter{width:32%;}
+    .averages__reddit{width:32%;}
+    .averages__wikipedia{width:32%;}
+    
+    .footer{
+        bottom:0;
+    }
+
+}
+
+/* Reliability section - currently replaced by "prediction section" */
+/*
+.reliability {
+    padding: 0;
+    margin:0;
+    border: 1px solid black;
+    margin: 1.5em auto;
+    display: grid;
+    min-width: 400px;
+    max-width: 800px;
+    grid-template-areas: "informal informal-reliability"
+                         "formal formal-reliability";
+    
+}
+
+.informal-label{grid-area:informal; border: 1px solid black;}
+.formal-label{grid-area:formal; border: 1px solid black;}
+.reliability__informal{grid-area:informal-reliability; border: 1px solid black;}
+.reliability__formal{grid-area:formal-reliability; border: 1px solid black;}
+
+*/
+
+/* Footer */
+.footer{
+    position:absolute;
+    bottom:-10;
+    width:100%;
+    margin: 1.5em 0 0;
+    padding:2em 0;
+    background-color:gray;
+    text-align:left;
+    font-size: var(--fs-sentences);
+}
