@@ -1,8 +1,9 @@
 # NJITHacks
 
-<b>Note:</b> This project has been updated, please see <a href="https://github.com/pl464/is-it-native">this</a> repo for updated web-based version.<br/><br/>
+
 English parser for people learning English to see if a given phrase is commonly used in practice
 
+<b>Note:</b> This project has been updated, please see <a href="https://github.com/pl464/is-it-native">this</a> repo for updated web-based version.<br/><br/>
 Before running: get API keys from Twitter and Reddit, put into credentials.json file
 
 This program is designed to give feedback on english phrases, but is no substitute for an english-speaking friend.
